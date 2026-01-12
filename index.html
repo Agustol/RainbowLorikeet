@@ -3,13 +3,25 @@
 <ul>
   <li>
     <a href="01.modern_bam_to_fasta_majority.sbatch">
-      SLURM script: per-sample BAM → SNP VCF / consensus
+      SLURM script (01): per-sample BAM → SNP VCF
     </a>
   </li>
 
   <li>
     <a href="merge_snps_miss60_density.sbatch">
-      SLURM script: SNP merging, missingness filtering, and window definition
+      SLURM script (02): SNP merging and density estimation
+    </a>
+  </li>
+
+  <li>
+    <a href="03.GetAlign_make_bed_windows_and_fastas.sbatch">
+      SLURM script (03): SNP-based window definition and FASTA extraction
+    </a>
+  </li>
+
+  <li>
+    <a href="04.windows_to_alignments.sbatch">
+      SLURM script (04): window-based FASTA assembly
     </a>
   </li>
 
@@ -21,7 +33,13 @@
 
   <li>
     <a href="merge_snps_missingness_density_workflow.png">
-      Workflow diagram 2: SNP merging and window-based density
+      Workflow diagram 2: SNP merging and window definition
+    </a>
+  </li>
+
+  <li>
+    <a href="windows_to_alignments_workflow.png">
+      Workflow diagram 3: window-based FASTA assembly
     </a>
   </li>
 
