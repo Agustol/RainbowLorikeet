@@ -1,48 +1,8 @@
-# Modern BAM → Majority-rule Consensus FASTA
-
-This repository contains a SLURM-based pipeline to process **modern resequencing BAM files**
-and generate **majority-rule variant calls** as an intermediate step toward
-**sample-specific consensus FASTA sequences**.
-
-The workflow is designed to minimize reference bias by relying on observed
-read data and explicit quality thresholds.
-
----
-
-## Script
-
-- `01.modern_bam_to_fasta_majority.sbatch`  
-  SLURM batch script to generate majority-rule VCFs from BAM files using `bcftools`.
-
----
-
-## Workflow Overview
-
-<p align="center">
-  <img src="bam_to_consensus_workflow.png" width="850">
-</p>
-
-<p align="center">
-  <strong>Figure 1.</strong> Workflow used to convert mapped BAM files into
-  sample-specific majority-rule consensus sequences.
-  BAM files are summarized into VCFs using <code>bcftools mpileup</code> and
-  <code>bcftools call -c</code>, followed by filtering, masking of low-confidence
-  sites, and consensus sequence generation.
-</p>
-
----
-
-## Input Files
-
-### Required inputs
-
-- **BAM list file**
-
 ## Downstream SNP Merging and Window Definition
 
 After per-sample SNP generation, SNPs are aggregated across individuals and
-summarized in fixed genomic windows. This step is used to define a
-reference-based windowing scheme and to quantify SNP density across the genome.
+summarized in genomic windows. This step defines a reference-based windowing
+scheme and quantifies SNP density across the genome.
 
 ### Script
 
@@ -50,13 +10,14 @@ reference-based windowing scheme and to quantify SNP density across the genome.
 
 ### Purpose
 
-The purpose of this step is to:
+This step is used to:
+
 - Merge per-sample SNP VCFs into a multi-sample VCF
-- Filter sites by overall missingness
+- Filter SNP sites by overall missingness
 - Define fixed, reference-based genomic windows
 - Quantify SNP density per window
 
-This step is **not** intended to produce a final analysis-ready genotype matrix.
+This step is **not** intended to produce a final genotype matrix for inference.
 
 ---
 
@@ -65,7 +26,7 @@ This step is **not** intended to produce a final analysis-ready genotype matrix.
 1. Merge per-sample SNP VCFs using `bcftools merge`
 2. Filter SNPs by site-level missingness (`F_MISSING ≤ 0.60`)
 3. Retain SNPs only (indels excluded)
-4. Define non-overlapping 10 kb windows based on the reference genome
+4. Define non-overlapping genomic windows based on the reference genome
 5. Count SNPs per window to estimate genome-wide SNP density
 
 ---
@@ -74,148 +35,87 @@ This step is **not** intended to produce a final analysis-ready genotype matrix.
 
 Multiallelic SNPs are intentionally retained at this stage.
 
-The merged VCF produced here is used exclusively for:
-- Defining genomic windows
-- Estimating SNP density
+The merged VCF is used exclusively to:
+- Define genomic windows
+- Estimate SNP density
+
+SNPs are treated as **positional markers**, not as genotypes for phylogenetic or
+population-genetic inference. Multiallelic filtering can be applied later
+without affecting window definitions.
+
 ### Workflow diagram
 
 ![SNP merging and window-based density workflow](merge_snps_missingness_density_workflow.png)
 
-SNPs are treated as **positional markers**, not as genotypes for phylogenetic or
-population-genetic inference. Multiallelic filtering can be applied later,
-during FASTA extraction, MSA generation, or tree inference, without affecting
-window definitions.
-
----
-## Window-based FASTA Extraction and Alignment Assembly
-
-After genomic windows have been defined from the merged SNP VCF (either using
-fixed-size windows or fixed-SNP windows), these windows are applied uniformly
-across all samples to generate window-specific FASTA sequences and
-multi-sample alignments.
-
-This stage links SNP-based window definition to downstream sequence-based
-analyses such as multiple sequence alignment (MSA) and phylogenetic inference.
-
 ---
 
-### Input dependencies
+## SNP-based Window Definition and FASTA Extraction
 
-This step assumes the following inputs have already been generated:
-## Window Definition from Merged SNPs and FASTA Extraction
-
-This step links SNP-based window definition to sequence-based analyses by
-constructing reference-coordinate BED windows from the merged SNP VCF and
-extracting the corresponding sequences from per-sample FASTA files.
+This step converts SNP-defined windows into reference-coordinate BED files and
+extracts the corresponding sequences from per-sample FASTA files.
 
 ### Script
 
 - `03.GetAlign_make_bed_windows_and_fastas.sbatch`
 
-1. **Window definitions (BED format)**  
-   Derived from the merged SNP VCF, using either:
-   - Fixed physical windows (e.g. 10 kb), or
-   - Fixed SNP-count windows (e.g. 50 SNPs per window)
+---
 
-2. **Per-sample FASTA files**  
-   Sample-specific FASTA sequences generated in earlier steps.
+### Inputs
 
-All window definitions are reference-based and shared across samples.
+This step requires:
+
+1. A **merged multi-sample SNP VCF**
+2. A **reference genome FASTA**
+3. **Per-sample FASTA files**
+
+The reference FASTA is used to validate chromosome boundaries and ensure that
+all window coordinates are consistent with the reference genome.
 
 ---
 
-### Script: window-based alignment construction
+### Processing overview
 
-- 04. windows_to_alignments.sbatch`
+1. Define genomic windows based on a fixed number of consecutive SNPs
+   (e.g. 50 SNPs per window), resetting at chromosome boundaries
+2. Validate window coordinates against reference chromosome lengths
+3. Generate a BED file describing all SNP-based windows
+4. Apply the BED windows uniformly to each per-sample FASTA file
 
-This script constructs window-specific multi-sample FASTA alignments from
-per-sample windowed FASTA files.
-
----
-
-### Processing logic
-
-1. **Per-sample window extraction**  
-   For each sample, window coordinates are used to extract sequence fragments
-   corresponding to each genomic window. Window identifiers are parsed from
-   FASTA headers and preserved.
-
-2. **Temporary per-sample storage**  
-   Extracted window sequences are written to per-sample temporary directories,
-   ensuring that each window and sample combination is tracked explicitly.
-
-3. **Window-wise merging across samples**  
-   For each genomic window, sequences from all samples are concatenated into a
-   single FASTA file, producing one alignment-ready FASTA per window.
-
-4. **Coordinate-consistent naming**  
-   Output files are named using window indices and reference coordinates,
-   ensuring traceability back to the reference genome.
-
----
-## Window-based FASTA Extraction and Alignment Assembly
-
-After genomic windows have been defined from the merged SNP VCF (either using
-fixed-size windows or fixed-SNP windows), these windows are applied uniformly
-across all samples to generate window-specific FASTA sequences and
-multi-sample alignments.
-
-This stage links SNP-based window definition to downstream sequence-based
-analyses such as multiple sequence alignment (MSA) and phylogenetic inference.
+This produces per-sample FASTA files in which each sequence corresponds to a
+single SNP-defined genomic window expressed in reference coordinates.
 
 ---
 
-### Input dependencies
+### Conceptual note
 
-This step assumes the following inputs have already been generated:
+Although window boundaries are derived from SNP positions in the merged VCF,
+all windows are expressed in reference genome coordinates. This ensures that:
 
-1. **Window definitions (BED format)**  
-   Derived from the merged SNP VCF, using either:
-   - Fixed physical windows (e.g. 10 kb), or
-   - Fixed SNP-count windows (e.g. 50 SNPs per window)
-
-2. **Per-sample FASTA files**  
-   Sample-specific FASTA sequences generated in earlier steps.
-
-All window definitions are reference-based and shared across samples.
+- Window definitions are independent of sample-specific FASTA content
+- FASTA extraction is purely coordinate-based
+- No circularity is introduced between SNP selection and sequence analysis
 
 ---
 
-### Script: window-based alignment construction
+## Window-based Alignment Assembly
 
-- `windows_to_alignments.sbatch`
+After window-specific FASTA files have been generated for each sample, sequences
+are combined across samples to produce one FASTA file per genomic window.
 
-This script constructs window-specific multi-sample FASTA alignments from
-per-sample windowed FASTA files.
+### Script
+
+- `04.windows_to_alignments.sbatch`
 
 ---
 
 ### Processing logic
 
-1. **Per-sample window extraction**  
-   For each sample, window coordinates are used to extract sequence fragments
-   corresponding to each genomic window. Window identifiers are parsed from
-   FASTA headers and preserved.
-
-2. **Temporary per-sample storage**  
-   Extracted window sequences are written to per-sample temporary directories,
-   ensuring that each window and sample combination is tracked explicitly.
-
-3. **Window-wise merging across samples**  
-   For each genomic window, sequences from all samples are concatenated into a
-   single FASTA file, producing one alignment-ready FASTA per window.
-
-4. **Coordinate-consistent naming**  
-   Output files are named using window indices and reference coordinates,
-   ensuring traceability back to the reference genome.
+1. Extract window-specific sequences for each sample
+2. Store sequences temporarily on a per-sample basis
+3. Merge sequences across samples for each genomic window
+4. Generate one FASTA file per window containing all samples
 
 ---
-
-### Outputs
-Pseudo MSA
-
-
-
 
 ### Outputs
 
