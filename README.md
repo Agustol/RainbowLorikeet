@@ -77,6 +77,9 @@ Multiallelic SNPs are intentionally retained at this stage.
 The merged VCF produced here is used exclusively for:
 - Defining genomic windows
 - Estimating SNP density
+### Workflow diagram
+
+![SNP merging and window-based density workflow](merge_snps_missingness_density_workflow.png)
 
 SNPs are treated as **positional markers**, not as genotypes for phylogenetic or
 population-genetic inference. Multiallelic filtering can be applied later,
