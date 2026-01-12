@@ -87,6 +87,125 @@ during FASTA extraction, MSA generation, or tree inference, without affecting
 window definitions.
 
 ---
+## Window-based FASTA Extraction and Alignment Assembly
+
+After genomic windows have been defined from the merged SNP VCF (either using
+fixed-size windows or fixed-SNP windows), these windows are applied uniformly
+across all samples to generate window-specific FASTA sequences and
+multi-sample alignments.
+
+This stage links SNP-based window definition to downstream sequence-based
+analyses such as multiple sequence alignment (MSA) and phylogenetic inference.
+
+---
+
+### Input dependencies
+
+This step assumes the following inputs have already been generated:
+
+1. **Window definitions (BED format)**  
+   Derived from the merged SNP VCF, using either:
+   - Fixed physical windows (e.g. 10 kb), or
+   - Fixed SNP-count windows (e.g. 50 SNPs per window)
+
+2. **Per-sample FASTA files**  
+   Sample-specific FASTA sequences generated in earlier steps.
+
+All window definitions are reference-based and shared across samples.
+
+---
+
+### Script: window-based alignment construction
+
+- `windows_to_alignments.sbatch`
+
+This script constructs window-specific multi-sample FASTA alignments from
+per-sample windowed FASTA files.
+
+---
+
+### Processing logic
+
+1. **Per-sample window extraction**  
+   For each sample, window coordinates are used to extract sequence fragments
+   corresponding to each genomic window. Window identifiers are parsed from
+   FASTA headers and preserved.
+
+2. **Temporary per-sample storage**  
+   Extracted window sequences are written to per-sample temporary directories,
+   ensuring that each window and sample combination is tracked explicitly.
+
+3. **Window-wise merging across samples**  
+   For each genomic window, sequences from all samples are concatenated into a
+   single FASTA file, producing one alignment-ready FASTA per window.
+
+4. **Coordinate-consistent naming**  
+   Output files are named using window indices and reference coordinates,
+   ensuring traceability back to the reference genome.
+
+---
+## Window-based FASTA Extraction and Alignment Assembly
+
+After genomic windows have been defined from the merged SNP VCF (either using
+fixed-size windows or fixed-SNP windows), these windows are applied uniformly
+across all samples to generate window-specific FASTA sequences and
+multi-sample alignments.
+
+This stage links SNP-based window definition to downstream sequence-based
+analyses such as multiple sequence alignment (MSA) and phylogenetic inference.
+
+---
+
+### Input dependencies
+
+This step assumes the following inputs have already been generated:
+
+1. **Window definitions (BED format)**  
+   Derived from the merged SNP VCF, using either:
+   - Fixed physical windows (e.g. 10 kb), or
+   - Fixed SNP-count windows (e.g. 50 SNPs per window)
+
+2. **Per-sample FASTA files**  
+   Sample-specific FASTA sequences generated in earlier steps.
+
+All window definitions are reference-based and shared across samples.
+
+---
+
+### Script: window-based alignment construction
+
+- `windows_to_alignments.sbatch`
+
+This script constructs window-specific multi-sample FASTA alignments from
+per-sample windowed FASTA files.
+
+---
+
+### Processing logic
+
+1. **Per-sample window extraction**  
+   For each sample, window coordinates are used to extract sequence fragments
+   corresponding to each genomic window. Window identifiers are parsed from
+   FASTA headers and preserved.
+
+2. **Temporary per-sample storage**  
+   Extracted window sequences are written to per-sample temporary directories,
+   ensuring that each window and sample combination is tracked explicitly.
+
+3. **Window-wise merging across samples**  
+   For each genomic window, sequences from all samples are concatenated into a
+   single FASTA file, producing one alignment-ready FASTA per window.
+
+4. **Coordinate-consistent naming**  
+   Output files are named using window indices and reference coordinates,
+   ensuring traceability back to the reference genome.
+
+---
+
+### Outputs
+
+
+
 
 ### Outputs
 
