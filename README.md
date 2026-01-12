@@ -173,8 +173,20 @@ from all samples.
 2. Store sequences temporarily on a per-sample basis
 3. Merge sequences across samples for each genomic window
 4. Generate one FASTA file per window with consistent naming
+5. 
 
 ---
+### Workflow diagram
+
+<p align="center">
+  <img src="windows_to_alignments_workflow.png" width="850">
+</p>
+
+This diagram summarizes the final pipeline step in which window-specific FASTA
+sequences generated for each sample are reorganized and merged across samples.
+For each genomic window, sequences from all samples are combined into a single
+FASTA file, producing alignment-ready inputs for downstream analyses.
+
 
 ### Outputs
 
