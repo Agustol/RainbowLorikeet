@@ -102,6 +102,15 @@ analyses such as multiple sequence alignment (MSA) and phylogenetic inference.
 ### Input dependencies
 
 This step assumes the following inputs have already been generated:
+## Window Definition from Merged SNPs and FASTA Extraction
+
+This step links SNP-based window definition to sequence-based analyses by
+constructing reference-coordinate BED windows from the merged SNP VCF and
+extracting the corresponding sequences from per-sample FASTA files.
+
+### Script
+
+- `03.GetAlign_make_bed_windows_and_fastas.sbatch`
 
 1. **Window definitions (BED format)**  
    Derived from the merged SNP VCF, using either:
@@ -117,7 +126,7 @@ All window definitions are reference-based and shared across samples.
 
 ### Script: window-based alignment construction
 
-- `windows_to_alignments.sbatch`
+- 04. windows_to_alignments.sbatch`
 
 This script constructs window-specific multi-sample FASTA alignments from
 per-sample windowed FASTA files.
