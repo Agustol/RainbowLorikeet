@@ -38,3 +38,52 @@ read data and explicit quality thresholds.
 
 - **BAM list file**
 
+## Downstream SNP Merging and Window Definition
+
+After per-sample SNP generation, SNPs are aggregated across individuals and
+summarized in fixed genomic windows. This step is used to define a
+reference-based windowing scheme and to quantify SNP density across the genome.
+
+### Script
+
+- `merge_snps_miss60_density.sbatch`
+
+### Purpose
+
+The purpose of this step is to:
+- Merge per-sample SNP VCFs into a multi-sample VCF
+- Filter sites by overall missingness
+- Define fixed, reference-based genomic windows
+- Quantify SNP density per window
+
+This step is **not** intended to produce a final analysis-ready genotype matrix.
+
+---
+
+### Processing steps
+
+1. Merge per-sample SNP VCFs using `bcftools merge`
+2. Filter SNPs by site-level missingness (`F_MISSING ≤ 0.60`)
+3. Retain SNPs only (indels excluded)
+4. Define non-overlapping 10 kb windows based on the reference genome
+5. Count SNPs per window to estimate genome-wide SNP density
+
+---
+
+### Treatment of multiallelic sites
+
+Multiallelic SNPs are intentionally retained at this stage.
+
+The merged VCF produced here is used exclusively for:
+- Defining genomic windows
+- Estimating SNP density
+
+SNPs are treated as **positional markers**, not as genotypes for phylogenetic or
+population-genetic inference. Multiallelic filtering can be applied later,
+during FASTA extraction, MSA generation, or tree inference, without affecting
+window definitions.
+
+---
+
+### Outputs
+
