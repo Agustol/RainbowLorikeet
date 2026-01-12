@@ -203,6 +203,7 @@ per-sample windowed FASTA files.
 ---
 
 ### Outputs
+Pseudo MSA
 
 
 
