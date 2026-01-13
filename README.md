@@ -188,5 +188,6 @@ For each genomic window, sequences from all samples are combined into a single
 FASTA file, producing alignment-ready inputs for downstream analyses.
 
 
-### Outputs
+A detailed comparison with legacy FASTQ-based methods is provided in `CONSENSUS_METHODS.md`.
+
 
