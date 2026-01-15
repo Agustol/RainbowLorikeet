@@ -76,8 +76,8 @@ population-genetic analyses.
 
 <p align="center">
   <img src="not-patching-method.png" width="850">
-</p>
-
+CONSENSUS_METHODS.md#consensus-methods-note-three-way-comparisson
+## For conceptual comparison read CONSENSUS_METHODS.m :: consensus-methods-note-three-way-comparisson
 
 ## Step 02 — SNP Merging and Window Definition (SNP Density)
 
