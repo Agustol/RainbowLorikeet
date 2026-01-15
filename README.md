@@ -50,6 +50,9 @@ input for downstream multi-sample aggregation.
 
 ---
 ## Script not patching method
+
+- `01.modern_bam_to_fasta_majority_not_patch.sbatch`
+
 This step processes mapped BAM files independently for each sample to generate
 all-sites VCF files, including both variant and invariant positions.
 
