@@ -25,9 +25,9 @@ Each step is implemented as an independent SLURM script.
 
 ---
 
-## Step 01 — Per-sample SNP Generation
+## Step 01 — Per-sample SNP Generation 
 
-### Script
+### Script patching method
 - `01.modern_bam_to_fasta_majority.sbatch`
 
 ### Description
@@ -49,6 +49,32 @@ input for downstream multi-sample aggregation.
 </p>
 
 ---
+## Script not patching method
+This step processes mapped BAM files independently for each sample to generate
+all-sites VCF files, including both variant and invariant positions.
+
+Variant calling is performed using bcftools mpileup followed by
+bcftools call -c -A, relying exclusively on observed read data and explicit
+mapping and base quality thresholds. Unlike patching-based approaches, invariant
+sites are retained only when supported by sequencing reads, and no reference
+alleles are implicitly imputed at sites lacking sufficient evidence.
+
+Sites with insufficient information—defined by low sequencing depth or
+heterozygous genotypes—are explicitly masked at the genotype level prior to
+consensus generation. This ensures that missing data are represented as unknown
+(N) rather than substituted with reference bases.
+
+The output of this step consists of per-sample, all-sites VCF files with
+explicit masking of low-confidence positions, which are subsequently converted
+into non-patching consensus FASTA sequences for downstream phylogenomic and
+population-genetic analyses.
+
+### Workflow diagram
+
+<p align="center">
+  <img src="not-patching-method.png" width="850">
+</p>
+
 
 ## Step 02 — SNP Merging and Window Definition (SNP Density)
 
