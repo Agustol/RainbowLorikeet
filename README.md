@@ -143,6 +143,9 @@ The reference genome FASTA is used to:
 - Ensure all window coordinates are valid with respect to chromosome lengths
 
 ---
+### Script
+For fix length windows uses this version
+- `03_v2.GetAlign_make_bed_fixlength_windows_and_fastas.sbatch`
 
 ### Inputs
 
